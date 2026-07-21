@@ -1,0 +1,33 @@
+name: 發文自動建立電子報草稿
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/src/content/thoughts/**"
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 找出這次 push 新增或修改的文章
+        id: changed
+        run: |
+          if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+            RANGE="HEAD~1..HEAD"
+          else
+            RANGE="${{ github.event.before }}..${{ github.event.after }}"
+          fi
+          FILES=$(git diff --name-only --diff-filter=AM "$RANGE" -- 'site/src/content/thoughts/*.md' | tr '\n' ' ')
+          echo "files=$FILES" >> "$GITHUB_OUTPUT"
+          echo "變更的文章：$FILES"
+
+      - name: 建立 Buttondown 草稿
+        if: steps.changed.outputs.files != ''
+        env:
+          BUTTONDOWN_API_KEY: ${{ secrets.BUTTONDOWN_API_KEY }}
+        run: python3 .github/scripts/newsletter_draft.py ${{ steps.changed.outputs.files }}
