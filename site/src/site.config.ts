@@ -7,6 +7,9 @@ export const SITE = {
   // 部署後若網址不同，記得改這裡（影響 RSS、sitemap、分享卡片連結）
   url: "https://isocyclo.netlify.app",
 
+  instagram: "https://www.instagram.com/regenwurm.h/",
+  contactEmail: "isocyclo25@gmail.com",
+
   buttondownUsername: "ying-huan",
   cusdisAppId: "b662b522-4dab-46b2-a3c6-3660f907ef7d",
 };
