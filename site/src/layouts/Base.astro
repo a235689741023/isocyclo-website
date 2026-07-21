@@ -7,7 +7,18 @@ interface Props {
   description?: string;
 }
 const { title, description = SITE.description } = Astro.props;
-const pageTitle = title ? `${title} — ${SITE.title}` : SITE.title;
+const pageTitle = title ? `${title} — ${SITE.htmlTitle}` : SITE.htmlTitle;
+const canonical = new URL(Astro.url.pathname, SITE.url).href;
+
+// 告訴搜尋引擎這個網站屬於誰（含所有別名）
+const personSchema = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Ying-Huan Chiu",
+  alternateName: ["邱映寰", "isocyclo", "Zoey Chiu"],
+  url: SITE.url,
+  sameAs: ["https://github.com/a235689741023"],
+});
 
 const nav = [
   { href: "/experience/", en: "[Encoding_of_Me]", zh: "組成我的那些", tip: "cat ./identity/core_profile.sh" },
@@ -25,6 +36,18 @@ const path = Astro.url.pathname;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={SITE.htmlTitle} />
+    <meta property="og:locale" content="zh_TW" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <script type="application/ld+json" set:html={personSchema} />
+    <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>▚</text></svg>" />
   </head>
@@ -104,6 +127,10 @@ const path = Astro.url.pathname;
   .navlink:hover .tip, .navlink:focus-visible .tip {
     opacity: 1; transform: translateX(-50%) translateY(0);
   }
+  /* 第一個項目提示靠左對齊，避免超出視窗 */
+  nav li:first-child .tip { left: 0; right: auto; transform: translateX(0) translateY(-4px); }
+  nav li:first-child .navlink:hover .tip,
+  nav li:first-child .navlink:focus-visible .tip { transform: translateX(0) translateY(0); }
   /* 靠右的項目提示往左對齊，避免超出視窗 */
   nav li:nth-last-child(-n+2) .tip { left: auto; right: 0; transform: translateX(0) translateY(-4px); }
   nav li:nth-last-child(-n+2) .navlink:hover .tip,

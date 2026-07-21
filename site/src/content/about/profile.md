@@ -1,5 +1,6 @@
 ---
 name: Ying-Huan Chiu (isocyclo)
+chineseName: 邱映寰
 photo: /uploads/profile-placeholder.svg
 ---
 

@@ -30,6 +30,7 @@ const about = defineCollection({
   loader: glob({ pattern: "profile.md", base: "./src/content/about" }),
   schema: z.object({
     name: z.string(),
+    chineseName: z.string().optional(),
     photo: z.string().default("/uploads/profile-placeholder.svg"),
   }),
 });

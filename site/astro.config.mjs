@@ -1,8 +1,10 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  // TODO: 部署後改成正式網址
-  site: "https://helenhan.example",
+  // 部署後若網址不同，記得同步改 src/site.config.ts 的 url
+  site: "https://isocyclo.netlify.app",
+  integrations: [sitemap()],
 });

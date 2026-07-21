@@ -27,6 +27,7 @@ collections:
         label: 照片與自我介紹
         fields:
           - { name: name, label: 名字, widget: string }
+          - { name: chineseName, label: 中文名字, widget: string, required: false }
           - { name: photo, label: 個人照片, widget: image, default: /uploads/profile-placeholder.svg }
           - { name: body, label: 自我介紹, widget: markdown }
 
