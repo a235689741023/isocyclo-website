@@ -1,0 +1,64 @@
+---
+import { getCollection, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+
+const [profile] = await getCollection("about");
+const ProfileContent = profile ? (await render(profile)).Content : null;
+
+const items = (await getCollection("experience"))
+  .sort((a, b) => a.data.order - b.data.order);
+
+const rendered = await Promise.all(
+  items.map(async (item) => ({ item, Content: (await render(item)).Content }))
+);
+---
+<Base title="Encoding_of_Me 組成我的那些" description="個人簡介與各領域累積的經驗與成果。">
+  <div class="wrap page-hero">
+    <span class="tag">TRACK_RECORD // {items.length} FIELDS</span>
+    <h1>Encoding_of_Me<span class="sub">組成我的那些</span></h1>
+  </div>
+
+  <div class="wrap groups">
+    {profile && (
+      <section class="panel profile">
+        <div class="panel-head"><b>WHOAMI //</b> 個人簡介</div>
+        <div class="profile-body">
+          <img class="photo" src={profile.data.photo} alt={`${profile.data.name} 的照片`} width="200" height="200" />
+          <div class="prose intro">
+            <p class="name mono">{profile.data.name}</p>
+            {ProfileContent && <ProfileContent />}
+          </div>
+        </div>
+      </section>
+    )}
+
+    {rendered.map(({ item, Content }) => (
+      <section class="panel">
+        <div class="panel-head">
+          <b>{item.data.field} //</b> {item.data.title}
+          <span>{item.data.period}</span>
+        </div>
+        <div class="prose body">
+          <Content />
+        </div>
+      </section>
+    ))}
+  </div>
+</Base>
+
+<style>
+  .groups { display: flex; flex-direction: column; gap: 20px; }
+  .body { font-size: 14.5px; }
+
+  .profile-body { display: flex; gap: 28px; align-items: flex-start; }
+  @media (max-width: 640px) { .profile-body { flex-direction: column; } }
+  .photo {
+    width: 200px; height: 200px; object-fit: cover; flex-shrink: 0;
+    border: 1px solid var(--line); border-radius: 6px;
+  }
+  .intro { font-size: 14.5px; }
+  .intro .name {
+    color: var(--aqua); font-size: 15px; letter-spacing: .08em;
+    margin-bottom: 4px;
+  }
+</style>

@@ -1,0 +1,5 @@
+# Netlify 建置設定 — 匯入這個 repo 時會自動套用，不用手動填
+[build]
+  base = "site"
+  command = "npm run build"
+  publish = "dist"

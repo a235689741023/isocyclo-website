@@ -1,0 +1,42 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+
+const entries = (await getCollection("status"))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const labels: Record<string, string> = { READ: "最近在讀", WATCH: "最近在看", TRY: "最近嘗試" };
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+---
+<Base title="Background_Tasks 背景作業" description="最近看了什麼書、什麼電影、在做什麼有趣的嘗試。">
+  <div class="wrap page-hero">
+    <span class="tag">STATUS // LIVE FEED</span>
+    <h1>Background_Tasks<span class="sub">背景作業</span></h1>
+    <p class="lede">最近看了什麼書、什麼電影、在做什麼有趣的嘗試。</p>
+  </div>
+
+  <div class="wrap">
+    <section class="panel">
+      <ul>
+        {entries.map((s) => (
+          <li class="row">
+            <span class="k mono">{s.data.kind}</span>
+            <span class="txt">{s.data.text}</span>
+            <span class="date mono">{fmt(s.data.date)}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .row {
+    padding: 14px 0; border-bottom: 1px dashed var(--line);
+    display: flex; gap: 14px; align-items: baseline; font-size: 14.5px;
+  }
+  .row:last-child { border-bottom: 0; }
+  .k { color: var(--aqua); font-size: 11.5px; letter-spacing: .1em; min-width: 4.5em; }
+  .txt { flex: 1; }
+  .date { color: var(--dim-deep); font-size: 11.5px; }
+</style>

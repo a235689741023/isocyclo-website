@@ -1,0 +1,98 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+import SubscribeForm from "../components/SubscribeForm.astro";
+
+const thoughts = (await getCollection("thoughts", ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+
+const status = (await getCollection("status"))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+
+const works = await getCollection("works");
+const platforms = [...new Set(works.map((w) => w.data.platform))].map((p) => ({
+  name: p,
+  count: works.filter((w) => w.data.platform === p).length,
+}));
+
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+---
+<Base>
+  <div class="wrap hero">
+    <span class="tag">WRITER / EXPLORER / v2026.07</span>
+    <h1>在文字與訊號之間，<br /><span class="grad-text">記錄我正在成為的樣子</span><span class="cursor" aria-hidden="true"></span></h1>
+    <p class="lede">
+      這裡存放我的採訪與邀稿作品、跨領域的經歷成果，以及還在發酵中的所思所想。歡迎留言，或訂閱電子報接收新文章。
+    </p>
+  </div>
+
+  <div class="wrap grid">
+    <section class="panel">
+      <div class="panel-head">
+        <b>LATEST_LOG //</b> 所思所想
+        <a href="/thoughts/" class="more">全部 →</a>
+      </div>
+      {thoughts.map((post) => (
+        <article class="art">
+          <h3><a href={`/thoughts/${post.id}/`}>{post.data.title}</a></h3>
+          <div class="meta">{fmt(post.data.date)} · {post.data.category}</div>
+        </article>
+      ))}
+      <SubscribeForm />
+    </section>
+
+    <div class="side">
+      <section class="panel">
+        <div class="panel-head">
+          <b>STATUS //</b> 最近在幹嘛
+          <a href="/status/" class="more">更多 →</a>
+        </div>
+        <ul class="status">
+          {status.map((s) => (
+            <li><span class="k mono">{s.data.kind}</span><span>{s.data.text}</span></li>
+          ))}
+        </ul>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><b>ARCHIVE //</b> 文字作品</div>
+        <p class="hint">依刊登平台分類瀏覽：</p>
+        <div class="chips">
+          {platforms.map((p) => (
+            <a class="chip" href={`/works/#${p.name}`}>{p.name} ×{p.count}</a>
+          ))}
+        </div>
+      </section>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .hero { padding-block: 88px 64px; }
+  .hero h1 {
+    font-size: clamp(36px, 6vw, 64px);
+    line-height: 1.15; font-weight: 800; letter-spacing: .02em;
+    margin-top: 26px;
+  }
+  .hero .lede { max-width: 34em; margin-top: 22px; color: var(--dim); }
+  .cursor {
+    display: inline-block; width: .55em; height: 1.05em;
+    background: var(--pink); vertical-align: -.15em; margin-left: 4px;
+    animation: blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  .side { display: flex; flex-direction: column; gap: 20px; }
+  .more { color: var(--dim); }
+  .more:hover { color: var(--pink); }
+
+  .status li { padding: 11px 0; border-bottom: 1px dashed var(--line); font-size: 14px; display: flex; gap: 10px; }
+  .status li:last-child { border-bottom: 0; }
+  .status .k { color: var(--aqua); font-size: 11.5px; letter-spacing: .1em; min-width: 4.5em; padding-top: 2px; }
+
+  .hint { font-size: 14px; color: var(--dim); margin-bottom: 14px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+</style>

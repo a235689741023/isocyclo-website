@@ -1,0 +1,33 @@
+---
+import { SITE } from "../site.config";
+const configured = SITE.buttondownUsername.length > 0;
+---
+<div class="sub">
+  <div class="panel-head"><b>SUBSCRIBE //</b> 電子報</div>
+  <p class="sub-note">新文章發布時寄到你的信箱，可直接在信裡讀完。</p>
+  {configured ? (
+    <form
+      action={`https://buttondown.com/api/emails/embed-subscribe/${SITE.buttondownUsername}`}
+      method="post"
+      target="_blank"
+      class="row"
+    >
+      <input type="email" name="email" required placeholder="your@email.com" aria-label="電子郵件" />
+      <button type="submit" class="btn">訂閱</button>
+    </form>
+  ) : (
+    <div class="row">
+      <input type="email" placeholder="your@email.com" aria-label="電子郵件" disabled />
+      <button type="button" class="btn" disabled title="尚未接上 Buttondown">訂閱</button>
+    </div>
+  )}
+  {!configured && <p class="todo mono">// TODO: 在 site.config.ts 填入 Buttondown 帳號後啟用</p>}
+</div>
+
+<style>
+  .sub-note { font-size: 12.5px; color: var(--dim); }
+  .row { display: flex; gap: 10px; margin-top: 14px; }
+  .row input { flex: 1; }
+  .btn[disabled] { opacity: .45; cursor: not-allowed; }
+  .todo { font-size: 11px; color: var(--dim-deep); margin-top: 10px; letter-spacing: .05em; }
+</style>

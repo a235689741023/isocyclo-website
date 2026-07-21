@@ -1,0 +1,32 @@
+---
+import { SITE } from "../site.config";
+
+interface Props {
+  pageId: string; // 每頁唯一的留言串 id
+  pageTitle: string;
+}
+const { pageId, pageTitle } = Astro.props;
+const configured = SITE.cusdisAppId.length > 0;
+---
+<section class="panel comments">
+  <div class="panel-head"><b>COMMENTS //</b> 留言</div>
+  {configured ? (
+    <div
+      id="cusdis_thread"
+      data-host="https://cusdis.com"
+      data-app-id={SITE.cusdisAppId}
+      data-page-id={pageId}
+      data-page-url={Astro.url.href}
+      data-page-title={pageTitle}
+      data-theme="dark"
+    ></div>
+  ) : (
+    <p class="todo mono">// TODO: 在 site.config.ts 填入 Cusdis App ID 後，這裡會出現免登入留言區</p>
+  )}
+</section>
+{configured && <script async defer src="https://cusdis.com/js/cusdis.es.js"></script>}
+
+<style>
+  .comments { margin-top: 48px; }
+  .todo { font-size: 12px; color: var(--dim-deep); letter-spacing: .05em; }
+</style>

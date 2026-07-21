@@ -1,0 +1,37 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import SubscribeForm from "../../components/SubscribeForm.astro";
+
+const posts = (await getCollection("thoughts", ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+---
+<Base title="Brain_Dump() 思緒漫遊" description="近期的所思所想文章。">
+  <div class="wrap page-hero">
+    <span class="tag">LATEST_LOG // {posts.length} ENTRIES</span>
+    <h1>Brain_Dump()<span class="sub">思緒漫遊</span></h1>
+    <p class="lede">還在發酵中的想法，先寫下來再說。訂閱電子報，新文章會寄到你信箱。</p>
+  </div>
+
+  <div class="wrap list">
+    <section class="panel">
+      {posts.map((post) => (
+        <article class="art">
+          <h3><a href={`/thoughts/${post.id}/`}>{post.data.title}</a></h3>
+          <div class="meta">{fmt(post.data.date)} · {post.data.category}</div>
+          {post.data.description && <p class="desc">{post.data.description}</p>}
+        </article>
+      ))}
+    </section>
+    <aside class="panel">
+      <SubscribeForm />
+    </aside>
+  </div>
+</Base>
+
+<style>
+  .list { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 800px) { .list { grid-template-columns: 1fr; } }
+  .desc { font-size: 13.5px; color: var(--dim); margin-top: 6px; }
+</style>

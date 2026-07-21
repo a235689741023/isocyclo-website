@@ -1,0 +1,120 @@
+---
+import { SITE } from "../site.config";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title, description = SITE.description } = Astro.props;
+const pageTitle = title ? `${title} — ${SITE.title}` : SITE.title;
+
+const nav = [
+  { href: "/experience/", en: "[Encoding_of_Me]", zh: "組成我的那些", tip: "cat ./identity/core_profile.sh" },
+  { href: "/works/", en: "[Output_Logs]", zh: "文字輸出檔", tip: "console.log(my_written_works);" },
+  { href: "/thoughts/", en: "[Brain_Dump()]", zh: "思緒漫遊", tip: "return newsletter.subscribe(my_DeepInsights_RandomSparks);" },
+  { href: "/status/", en: "[Background_Tasks]", zh: "背景作業", tip: 'ps aux | grep -E "books|movies|games"' },
+  { href: "/guestbook/", en: "[Open_Port]", zh: "開放連接埠", tip: "ssh guest@my_server -p 8080" },
+];
+const path = Astro.url.pathname;
+---
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>▚</text></svg>" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap nav">
+        <a class="logo mono" href="/">
+          {SITE.title.split(/([_.])/).map((part) =>
+            part === "_" || part === "." ? <b>{part}</b> : part
+          )}
+        </a>
+        <nav aria-label="主選單">
+          <ul>
+            {nav.map((item) => (
+              <li>
+                <a class="navlink" href={item.href} aria-current={path.startsWith(item.href) ? "page" : undefined}>
+                  <span class="en mono">{item.en}</span>
+                  <span class="zh">{item.zh}</span>
+                  <span class="tip mono" aria-hidden="true">{item.tip}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap mono">
+        © 2026 {SITE.author} — BUILT WITH CARE, POWERED BY CURIOSITY
+        <a href="/rss.xml">RSS</a>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(10, 18, 20, .9);
+    backdrop-filter: blur(6px);
+  }
+  .nav { display: flex; align-items: center; gap: 28px; padding-block: 16px; flex-wrap: wrap; }
+  .logo { font-size: 15px; letter-spacing: .12em; color: var(--aqua); }
+  .logo b { color: var(--pink); font-weight: 400; }
+  nav ul { display: flex; gap: 24px; color: var(--dim); flex-wrap: wrap; }
+  nav li { position: relative; }
+  .navlink { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+  .navlink .en { font-size: 12.5px; letter-spacing: .04em; }
+  .navlink .zh { font-size: 10.5px; color: var(--dim-deep); letter-spacing: .12em; }
+  .navlink:hover .en, .navlink:focus-visible .en { color: var(--aqua); }
+  .navlink:hover .zh, .navlink:focus-visible .zh { color: var(--dim); }
+  .navlink[aria-current="page"] .en { color: var(--pink); }
+
+  /* hover 顯示的終端指令提示 */
+  .tip {
+    position: absolute; top: calc(100% + 10px); left: 50%; transform: translateX(-50%) translateY(-4px);
+    width: max-content;
+    max-width: min(420px, calc(100vw - 32px));
+    overflow-wrap: anywhere;
+    pointer-events: none;
+    font-size: 11px; letter-spacing: .03em;
+    color: #00E5FF;
+    background: rgba(8, 17, 15, .95);
+    border: 1px solid rgba(0, 229, 255, .35);
+    border-radius: 3px; padding: 5px 10px;
+    opacity: 0; transition: opacity .15s ease, transform .15s ease;
+    text-shadow: 0 0 6px rgba(0, 229, 255, .8), 0 0 18px rgba(0, 229, 255, .4);
+    box-shadow: 0 0 12px rgba(0, 229, 255, .12);
+  }
+  .tip::before { content: "> "; }
+  .navlink:hover .tip, .navlink:focus-visible .tip {
+    opacity: 1; transform: translateX(-50%) translateY(0);
+  }
+  /* 靠右的項目提示往左對齊，避免超出視窗 */
+  nav li:nth-last-child(-n+2) .tip { left: auto; right: 0; transform: translateX(0) translateY(-4px); }
+  nav li:nth-last-child(-n+2) .navlink:hover .tip,
+  nav li:nth-last-child(-n+2) .navlink:focus-visible .tip { transform: translateX(0) translateY(0); }
+  .site-footer {
+    border-top: 1px solid var(--line);
+    margin-top: 80px;
+    padding-block: 26px 40px;
+    color: var(--dim);
+    font-size: 12px; letter-spacing: .1em;
+  }
+  .site-footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .site-footer a:hover { color: var(--aqua); }
+</style>

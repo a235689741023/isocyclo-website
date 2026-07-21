@@ -1,0 +1,37 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import Comments from "../../components/Comments.astro";
+
+const topics = (await getCollection("topics"))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+---
+<Base title="Open_Port 開放連接埠" description="留言討論區：站長發起的話題與自由留言板。">
+  <div class="wrap page-hero">
+    <span class="tag">GUESTBOOK // SAY_HI</span>
+    <h1>Open_Port<span class="sub">開放連接埠</span></h1>
+    <p class="lede">歡迎留下任何想說的話——讀後感、吐槽、或只是路過打個招呼。也可以加入下面的話題討論。</p>
+  </div>
+
+  <div class="wrap cols">
+    <section class="panel">
+      <div class="panel-head"><b>THREADS //</b> 進行中的話題 <span>{topics.length} 串</span></div>
+      {topics.length === 0 && <p class="empty">還沒有話題，敬請期待。</p>}
+      {topics.map((t) => (
+        <article class="art">
+          <h3><a href={`/guestbook/${t.id}/`}>{t.data.title}</a></h3>
+          <div class="meta">{fmt(t.data.date)} · 點進去加入討論 →</div>
+        </article>
+      ))}
+    </section>
+
+    <Comments pageId="guestbook" pageTitle="留言板" />
+  </div>
+</Base>
+
+<style>
+  .cols { max-width: 780px; display: flex; flex-direction: column; gap: 24px; }
+  .cols :global(.comments) { margin-top: 0; }
+  .empty { font-size: 14px; color: var(--dim); }
+</style>

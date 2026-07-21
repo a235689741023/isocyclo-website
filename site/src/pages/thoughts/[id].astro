@@ -1,0 +1,39 @@
+---
+import { getCollection, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import Comments from "../../components/Comments.astro";
+import SubscribeForm from "../../components/SubscribeForm.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("thoughts", ({ data }) => !data.draft);
+  return posts.map((post) => ({ params: { id: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+---
+<Base title={post.data.title} description={post.data.description}>
+  <article class="wrap">
+    <header class="page-hero">
+      <span class="tag">{fmt(post.data.date)} // {post.data.category}</span>
+      <h1>{post.data.title}</h1>
+    </header>
+    <div class="prose">
+      <Content />
+    </div>
+
+    <div class="after">
+      <div class="panel"><SubscribeForm /></div>
+      <Comments pageId={`thoughts-${post.id}`} pageTitle={post.data.title} />
+    </div>
+    <p class="back mono"><a href="/thoughts/">← BACK_TO_LOG</a></p>
+  </article>
+</Base>
+
+<style>
+  .after { max-width: 42em; margin-top: 56px; display: flex; flex-direction: column; gap: 24px; }
+  .back { margin-top: 40px; font-size: 12px; letter-spacing: .1em; }
+  .back a { color: var(--dim); }
+  .back a:hover { color: var(--aqua); }
+</style>

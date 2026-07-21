@@ -1,0 +1,42 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+
+const works = (await getCollection("works"))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const platforms = [...new Set(works.map((w) => w.data.platform))];
+const fmt = (d: Date) => d.toISOString().slice(0, 7).replace("-", ".");
+---
+<Base title="Output_Logs 文字輸出檔" description="曾發表的邀稿與採訪作品，依刊登平台分類。">
+  <div class="wrap page-hero">
+    <span class="tag">ARCHIVE // {works.length} PIECES</span>
+    <h1>Output_Logs<span class="sub">文字輸出檔</span></h1>
+    <p class="lede">曾發表的邀稿與採訪，依刊登平台分類。點擊標題可前往原文。</p>
+  </div>
+
+  <div class="wrap groups">
+    {platforms.map((platform) => (
+      <section class="panel" id={platform}>
+        <div class="panel-head">
+          <b>PLATFORM //</b> {platform}
+          <span>{works.filter((w) => w.data.platform === platform).length} 篇</span>
+        </div>
+        {works.filter((w) => w.data.platform === platform).map((w) => (
+          <article class="art">
+            <h3>
+              {w.data.url
+                ? <a href={w.data.url} target="_blank" rel="noopener">{w.data.title} ↗</a>
+                : w.data.title}
+            </h3>
+            <div class="meta">{fmt(w.data.date)}{w.data.note && ` · ${w.data.note}`}</div>
+          </article>
+        ))}
+      </section>
+    ))}
+  </div>
+</Base>
+
+<style>
+  .groups { display: flex; flex-direction: column; gap: 20px; }
+</style>
