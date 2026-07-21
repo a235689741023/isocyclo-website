@@ -8,5 +8,21 @@
   </head>
   <body>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <script>
+      // 文章編輯器的「YouTube 影片」按鈕：貼上網址即可嵌入影片
+      CMS.registerEditorComponent({
+        id: "youtube",
+        label: "YouTube 影片",
+        fields: [{ name: "url", label: "影片網址", widget: "string" }],
+        pattern: /^<iframe class="video-embed" src="https:\/\/www\.youtube-nocookie\.com\/embed\/([\w-]+)".*<\/iframe>$/,
+        fromBlock: (match) => ({ url: `https://www.youtube.com/watch?v=${match[1]}` }),
+        toBlock: ({ url }) => {
+          const id = (url || "").match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{6,})/)?.[1];
+          if (!id) return `（無法辨識的 YouTube 網址：${url}）`;
+          return `<iframe class="video-embed" src="https://www.youtube-nocookie.com/embed/${id}" title="YouTube video" allowfullscreen loading="lazy"></iframe>`;
+        },
+        toPreview: ({ url }) => `<p>▶ YouTube：${url}</p>`,
+      });
+    </script>
   </body>
 </html>

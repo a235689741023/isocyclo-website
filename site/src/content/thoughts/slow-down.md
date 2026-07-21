@@ -16,3 +16,13 @@ description: 慢不是速度的問題，是注意力的問題。
 > 慢，是讓每一分鐘都有重量。
 
 也許之後我該練習的不是「少做一點」，而是「一次只做一件」。
+
+## 圖片與影片示範（可刪）
+
+文章裡可以放圖片：
+
+![佔位示意圖](/uploads/profile-placeholder.svg)
+
+也可以嵌入 YouTube 影片：
+
+<iframe class="video-embed" src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="YouTube video" allowfullscreen loading="lazy"></iframe>

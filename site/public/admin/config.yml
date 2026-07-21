@@ -1,20 +1,16 @@
 # Decap CMS 設定 — 網頁後台編輯內容
 #
-# 目前使用 local_backend：在本機跑 `npx decap-server`（在 site/ 目錄）後，
-# 打開 http://localhost:4321/admin/ 即可用網頁介面編輯，存檔直接寫進 src/content。
-#
-# TODO 部署後：把 backend 換成 GitHub（需要 GitHub repo），例如：
-#   backend:
-#     name: github
-#     repo: <你的帳號>/<repo 名稱>
-#     branch: main
+# 線上後台（https://isocyclo.netlify.app/admin/）：透過 GitHub 登入，
+# 存檔會直接 commit 到 repo，Netlify 自動重新部署（約 1–2 分鐘生效）。
+# 本機後台：在 site/ 目錄跑 `npx decap-server` 後開 http://localhost:4322/admin/index.html
 local_backend: true
 backend:
-  name: git-gateway
+  name: github
+  repo: a235689741023/isocyclo-website
   branch: main
 
 locale: zh_Hant
-site_url: https://helenhan.example
+site_url: https://isocyclo.netlify.app
 media_folder: site/public/uploads
 public_folder: /uploads
 

@@ -146,6 +146,11 @@ input::placeholder, textarea::placeholder { color: var(--dim-deep); }
 .prose pre { background: var(--panel-deep); border: 1px solid var(--line); border-radius: 6px; padding: 16px 20px; overflow-x: auto; }
 .prose pre code { border: 0; padding: 0; background: none; }
 .prose img { border: 1px solid var(--line); border-radius: 6px; }
+.prose video { max-width: 100%; border: 1px solid var(--line); border-radius: 6px; }
+.prose .video-embed, .prose iframe {
+  width: 100%; aspect-ratio: 16 / 9; border: 1px solid var(--line);
+  border-radius: 6px; display: block; margin: 1.5em 0;
+}
 .prose hr { border: 0; border-top: 1px dashed var(--line); margin: 2.5em 0; }
 
 /* ---- 頁面標題區 ---- */
