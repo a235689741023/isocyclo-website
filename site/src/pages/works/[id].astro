@@ -1,0 +1,48 @@
+---
+import { getCollection, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+
+// 只為「有內文」的作品生成站內閱讀頁（紙本或想全文刊登的作品）
+export async function getStaticPaths() {
+  const works = await getCollection("works");
+  return works
+    .filter((w) => w.body && w.body.trim().length > 0)
+    .map((work) => ({ params: { id: work.id }, props: { work } }));
+}
+
+const { work } = Astro.props;
+const { Content } = await render(work);
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+---
+<Base title={work.data.title} description={work.data.note ?? work.data.title}>
+  <article class="wrap">
+    <header class="page-hero">
+      <span class="tag">{work.data.platform} // {fmt(work.data.date)}</span>
+      <h1 class="work-title">{work.data.title}</h1>
+      {work.data.note && <p class="lede">{work.data.note}</p>}
+      {work.data.url && (
+        <p class="origin">
+          <a href={work.data.url} target="_blank" rel="noopener">原文連結 ↗</a>
+        </p>
+      )}
+    </header>
+    <div class="prose">
+      <Content />
+    </div>
+    <p class="back mono"><a href="/works/">← BACK_TO_ARCHIVE</a></p>
+  </article>
+</Base>
+
+<style>
+  .work-title { font-family: var(--font-body); font-size: clamp(26px, 4vw, 40px); }
+  .origin { margin-top: 16px; }
+  .origin a {
+    font-family: var(--font-mono); font-size: 13px;
+    color: var(--aqua); border: 1px solid var(--line);
+    padding: 6px 14px; border-radius: 4px; display: inline-block;
+  }
+  .origin a:hover { border-color: var(--pink); color: var(--pink); }
+  .back { margin-top: 48px; font-size: 12px; letter-spacing: .1em; }
+  .back a { color: var(--dim); }
+  .back a:hover { color: var(--aqua); }
+</style>

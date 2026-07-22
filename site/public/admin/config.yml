@@ -52,7 +52,7 @@ collections:
       - { name: date, label: 發表日期, widget: datetime, format: "YYYY-MM-DD", time_format: false }
       - { name: url, label: 原文連結, widget: string, required: false }
       - { name: note, label: 一句話介紹, widget: string, required: false }
-      - { name: body, label: 補充說明, widget: markdown, required: false }
+      - { name: body, label: 內文（填了就會在站內顯示全文，適合紙本作品；留空則點標題連往原文）, widget: markdown, required: false }
 
   - name: experience
     label: 經歷成果

@@ -7,12 +7,13 @@ const works = (await getCollection("works"))
 
 const platforms = [...new Set(works.map((w) => w.data.platform))];
 const fmt = (d: Date) => d.toISOString().slice(0, 7).replace("-", ".");
+const hasBody = (w: (typeof works)[number]) => Boolean(w.body && w.body.trim().length > 0);
 ---
 <Base title="Output_Logs 文字輸出檔" description="曾發表的邀稿與採訪作品，依刊登平台分類。">
   <div class="wrap page-hero">
     <span class="tag">ARCHIVE // {works.length} PIECES</span>
     <h1>Output_Logs<span class="sub">文字輸出檔</span></h1>
-    <p class="lede">曾發表的邀稿與採訪，依刊登平台分類。點擊標題可前往原文。</p>
+    <p class="lede">曾發表的邀稿與採訪，依刊登平台分類。有內文的作品可在站內閱讀全文，其餘連往原文。</p>
   </div>
 
   <div class="wrap groups">
@@ -25,9 +26,11 @@ const fmt = (d: Date) => d.toISOString().slice(0, 7).replace("-", ".");
         {works.filter((w) => w.data.platform === platform).map((w) => (
           <article class="art">
             <h3>
-              {w.data.url
-                ? <a href={w.data.url} target="_blank" rel="noopener">{w.data.title} ↗</a>
-                : w.data.title}
+              {hasBody(w)
+                ? <a href={`/works/${w.id}/`}>{w.data.title} <span class="read">閱讀全文 →</span></a>
+                : w.data.url
+                  ? <a href={w.data.url} target="_blank" rel="noopener">{w.data.title} ↗</a>
+                  : w.data.title}
             </h3>
             <div class="meta">{fmt(w.data.date)}{w.data.note && ` · ${w.data.note}`}</div>
           </article>
@@ -39,4 +42,9 @@ const fmt = (d: Date) => d.toISOString().slice(0, 7).replace("-", ".");
 
 <style>
   .groups { display: flex; flex-direction: column; gap: 20px; }
+  .read {
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--dim); letter-spacing: .04em; white-space: nowrap;
+  }
+  .art h3 a:hover .read { color: var(--pink); }
 </style>
