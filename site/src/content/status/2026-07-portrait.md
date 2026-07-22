@@ -1,5 +1,5 @@
 ---
 kind: WATCH
-text: 《燃燒女子的畫像》重看第三次
+text: 《Killing Eve》on Netflix（相見恨晚......）
 date: 2026-07-05
 ---
