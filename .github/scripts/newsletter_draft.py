@@ -12,7 +12,7 @@ import sys
 import urllib.request
 
 API = "https://api.buttondown.com/v1"
-SITE_URL = "https://isocyclo.netlify.app"
+SITE_URL = "https://isocyclo.com"
 TOKEN = os.environ["BUTTONDOWN_API_KEY"]
 
 

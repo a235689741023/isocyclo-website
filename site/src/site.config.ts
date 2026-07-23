@@ -5,7 +5,7 @@ export const SITE = {
   author: "Ying-Huan Chiu (Zoey Chiu)",
   description: "Ying-Huan Chiu（邱映寰／isocyclo）的個人網站：採訪與邀稿作品、跨領域經歷成果，以及還在發酵中的所思所想。",
   // 部署後若網址不同，記得改這裡（影響 RSS、sitemap、分享卡片連結）
-  url: "https://isocyclo.netlify.app",
+  url: "https://isocyclo.com",
 
   instagram: "https://www.instagram.com/regenwurm.h/",
   contactEmail: "isocyclo25@gmail.com",

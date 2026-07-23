@@ -1,6 +1,6 @@
 # Decap CMS 設定 — 網頁後台編輯內容
 #
-# 線上後台（https://isocyclo.netlify.app/admin/）：透過 GitHub 登入，
+# 線上後台（https://isocyclo.com/admin/）：透過 GitHub 登入，
 # 存檔會直接 commit 到 repo，Netlify 自動重新部署（約 1–2 分鐘生效）。
 # 本機後台：在 site/ 目錄跑 `npx decap-server` 後開 http://localhost:4322/admin/index.html
 local_backend: true
@@ -10,7 +10,7 @@ backend:
   branch: main
 
 locale: zh_Hant
-site_url: https://isocyclo.netlify.app
+site_url: https://isocyclo.com
 media_folder: site/public/uploads
 public_folder: /uploads
 
