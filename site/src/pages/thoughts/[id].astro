@@ -3,6 +3,7 @@ import { getCollection, render } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import Comments from "../../components/Comments.astro";
 import SubscribeForm from "../../components/SubscribeForm.astro";
+import ReadingProgress from "../../components/ReadingProgress.astro";
 
 export async function getStaticPaths() {
   const posts = await getCollection("thoughts", ({ data }) => !data.draft);
@@ -14,6 +15,7 @@ const { Content } = await render(post);
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
 ---
 <Base title={post.data.title} description={post.data.description}>
+  <ReadingProgress />
   <article class="wrap">
     <header class="page-hero">
       <span class="tag">{fmt(post.data.date)} // {post.data.category}</span>
