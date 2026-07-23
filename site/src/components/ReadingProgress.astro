@@ -1,14 +1,21 @@
 ---
 // 閱讀進度條 — D 混搭版：掃描游標 + 細離散刻度，已讀刻度整條綠→粉漸變
 // 桌機：右側垂直；手機：底部橫向半透明。純裝飾，隨頁面捲動更新。
+// 注意：刻度必須由此模板渲染（帶 Astro scoped 標記），才會套用下方 <style>。
+const VTICKS = 40;
+const HTICKS = 46;
 ---
 <div class="reading-progress" aria-hidden="true">
   <div class="rp-vert">
-    <div class="rp-ticks rp-ticks-v"></div>
+    <div class="rp-ticks rp-ticks-v">
+      {Array.from({ length: VTICKS }).map(() => <i></i>)}
+    </div>
     <div class="rp-cur rp-cur-v"><span class="rp-dot"></span><span class="rp-lbl mono">0%</span></div>
   </div>
   <div class="rp-horiz">
-    <div class="rp-ticks rp-ticks-h"></div>
+    <div class="rp-ticks rp-ticks-h">
+      {Array.from({ length: HTICKS }).map(() => <i></i>)}
+    </div>
     <span class="rp-cur-h"></span>
   </div>
 </div>
@@ -50,30 +57,25 @@
 
 <script>
   const AQUA = [62, 230, 201], PINK = [255, 168, 197];
-  const lerp = (t: number) =>
+  const lerp = (t) =>
     `rgb(${Math.round(AQUA[0] + (PINK[0] - AQUA[0]) * t)},${Math.round(AQUA[1] + (PINK[1] - AQUA[1]) * t)},${Math.round(AQUA[2] + (PINK[2] - AQUA[2]) * t)})`;
 
-  function setup(container: Element | null, count: number) {
-    if (!container) return { items: [] as HTMLElement[], colors: [] as string[] };
-    const colors: string[] = [];
-    const items: HTMLElement[] = [];
-    for (let i = 0; i < count; i++) {
-      colors.push(lerp(count > 1 ? i / (count - 1) : 0));
-      const el = document.createElement("i");
-      container.appendChild(el);
-      items.push(el);
-    }
+  // 讀取模板已渲染的刻度（帶 scoped 樣式），預先算好每格的漸變色
+  function setup(selector) {
+    const container = document.querySelector(selector);
+    const items = container ? Array.from(container.children) : [];
+    const n = items.length;
+    const colors = items.map((_, i) => lerp(n > 1 ? i / (n - 1) : 0));
     return { items, colors };
   }
 
-  const VT = 40, HT = 46;
-  const v = setup(document.querySelector(".rp-ticks-v"), VT);
-  const h = setup(document.querySelector(".rp-ticks-h"), HT);
-  const curV = document.querySelector<HTMLElement>(".rp-cur-v");
-  const curH = document.querySelector<HTMLElement>(".rp-cur-h");
-  const lbl = document.querySelector<HTMLElement>(".rp-lbl");
+  const v = setup(".rp-ticks-v");
+  const h = setup(".rp-ticks-h");
+  const curV = document.querySelector(".rp-cur-v");
+  const curH = document.querySelector(".rp-cur-h");
+  const lbl = document.querySelector(".rp-lbl");
 
-  function paint(items: HTMLElement[], colors: string[], p: number) {
+  function paint(items, colors, p) {
     const on = Math.round(p * items.length);
     items.forEach((it, i) => {
       if (i < on) {
