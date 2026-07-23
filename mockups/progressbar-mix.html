@@ -1,0 +1,173 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>閱讀進度條 · C×D 混搭試做</title>
+<style>
+  :root {
+    --bg: #0A1214; --panel: #0F1B1E; --line: #1E3A3C;
+    --aqua: #3EE6C9; --pink: #FFA8C5; --text: #D7E6E4; --dim: #7FA39D; --dim-deep: #4d6a66;
+    --font-body: "PingFang TC", "Hiragino Sans TC", "Microsoft JhengHei", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+    --grad-h: linear-gradient(90deg, var(--aqua), var(--pink));
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--font-body); font-size: 15px; line-height: 1.7;
+    -webkit-font-smoothing: antialiased; padding: 0 0 60px;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(62,230,201,.025) 3px 4px);
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 28px; position: relative; z-index: 2; }
+  .head { padding: 40px 0 8px; }
+  h1 { font-family: var(--font-mono); font-size: 24px; font-weight: 800; margin: 0; }
+  h1 .sub { display:block; font-family: var(--font-body); font-size: 14px; color: var(--dim); letter-spacing: .28em; margin-top: 8px; }
+  .lede { color: var(--dim); max-width: 42em; margin: 14px 0 0; }
+  .lede b { color: var(--aqua); font-weight: 400; }
+
+  .control {
+    position: sticky; top: 0; z-index: 40;
+    background: rgba(10,18,20,.92); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line); padding: 14px 0; margin-bottom: 26px;
+  }
+  .control .wrap { display: flex; align-items: center; gap: 16px; }
+  .control label { font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em; color: var(--aqua); white-space: nowrap; }
+  .control input[type=range] { flex: 1; accent-color: var(--pink); height: 4px; }
+  .control .val { font-family: var(--font-mono); font-size: 13px; color: var(--pink); font-variant-numeric: tabular-nums; min-width: 3.5em; text-align: right; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 22px; position: relative; }
+  .card.hl { border-color: rgba(62,230,201,.5); }
+  .card::before { content:""; position:absolute; top:-1px; left:-1px; width:14px; height:14px; border-top:2px solid var(--aqua); border-left:2px solid var(--aqua); }
+  .card::after { content:""; position:absolute; bottom:-1px; right:-1px; width:14px; height:14px; border-bottom:2px solid var(--pink); border-right:2px solid var(--pink); }
+  .card h2 { font-family: var(--font-mono); font-size: 16px; margin: 0 0 2px; }
+  .card h2 .zh { font-size: 13px; color: var(--dim); font-family: var(--font-body); letter-spacing: .08em; }
+  .badge { font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; color: var(--pink); border: 1px solid rgba(255,168,197,.4); border-radius: 3px; padding: 1px 7px; margin-left: 8px; vertical-align: 2px; }
+  .card .desc { font-size: 13px; color: var(--dim); margin: 10px 0 20px; min-height: 4.4em; }
+  .demo-label { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .18em; color: var(--dim-deep); margin: 16px 0 8px; }
+
+  .frame-desktop { position: relative; height: 250px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; padding: 18px 46px 18px 18px; }
+  .frame-desktop .lines i, .frame-mobile .lines i { display:block; height: 7px; background: rgba(126,163,157,.16); border-radius: 3px; margin-bottom: 11px; }
+  .frame-desktop .lines i:nth-child(3n){ width: 72%; } .frame-desktop .lines i:nth-child(4n){ width: 88%; }
+  .frame-mobile { position: relative; width: 160px; height: 260px; margin: 0 auto; background: var(--bg); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; padding: 16px 14px; }
+  .frame-mobile .lines i:nth-child(3n){ width: 70%; } .frame-mobile .lines i:nth-child(odd){ width: 92%; }
+
+  /* ---------- C 原版：掃描游標（連續軌道線） ---------- */
+  .c .rail-v { position:absolute; right:20px; top:24px; bottom:24px; width:2px; background:var(--line); }
+  .c .rail-v .done { position:absolute; top:0; left:0; right:0; height:var(--p); background:linear-gradient(180deg, rgba(62,230,201,.5), rgba(255,168,197,.5)); }
+  .c .rail-v .cur { position:absolute; top:var(--p); left:50%; transform:translate(-50%,-50%); display:flex; align-items:center; gap:7px; flex-direction:row-reverse; }
+  .c .rail-v .dot { width:10px; height:10px; border-radius:50%; background:var(--pink); box-shadow:0 0 8px rgba(255,168,197,.9), 0 0 18px rgba(255,168,197,.5); }
+  .c .rail-v .lbl { font-family:var(--font-mono); font-size:10px; color:var(--aqua); white-space:nowrap; }
+  .c .rail-h { position:absolute; left:0; right:0; bottom:0; height:2px; background:var(--line); }
+  .c .rail-h .done { position:absolute; left:0; bottom:0; height:2px; width:var(--p); background:var(--grad-h); }
+  .c .rail-h .cur { position:absolute; bottom:-3px; left:var(--p); transform:translateX(-50%); width:8px; height:8px; border-radius:50%; background:var(--pink); box-shadow:0 0 7px rgba(255,168,197,.9); }
+
+  /* ---------- D 混搭：掃描游標 + 細離散刻度 ---------- */
+  .d .rail-v { position:absolute; right:16px; top:24px; bottom:24px; width:22px; }
+  .d .ticks-v { position:absolute; right:0; top:0; bottom:0; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-end; }
+  .d .ticks-v i { display:block; width:10px; height:2px; background:var(--line); border-radius:2px; transition: background .12s, box-shadow .12s, width .12s; }
+  .d .ticks-v i.on { background:var(--aqua); box-shadow:0 0 5px rgba(62,230,201,.55); }
+  .d .ticks-v i.on.t3 { width:12px; background:#7ff0dd; }
+  .d .ticks-v i.on.t2 { width:14px; background:#c7f0e0; }
+  .d .ticks-v i.on.t1 { width:16px; background:var(--pink); box-shadow:0 0 7px rgba(255,168,197,.9); }
+  .d .cur-v { position:absolute; right:0; top:var(--p); transform:translateY(-50%); display:flex; align-items:center; gap:7px; flex-direction:row-reverse; }
+  .d .cur-v .dot { width:11px; height:11px; border-radius:50%; background:var(--pink); box-shadow:0 0 9px rgba(255,168,197,1), 0 0 20px rgba(255,168,197,.55); }
+  .d .cur-v .lbl { font-family:var(--font-mono); font-size:10px; color:var(--aqua); white-space:nowrap; }
+
+  .d .rail-h { position:absolute; left:12px; right:12px; bottom:9px; height:16px; }
+  .d .ticks-h { position:absolute; left:0; right:0; bottom:0; display:flex; justify-content:space-between; align-items:flex-end; }
+  .d .ticks-h i { display:block; width:2px; height:8px; background:var(--line); border-radius:2px; transition: background .12s, box-shadow .12s, height .12s; }
+  .d .ticks-h i.on { background:var(--aqua); box-shadow:0 0 5px rgba(62,230,201,.55); }
+  .d .ticks-h i.on.t3 { height:10px; background:#7ff0dd; }
+  .d .ticks-h i.on.t2 { height:12px; background:#c7f0e0; }
+  .d .ticks-h i.on.t1 { height:14px; background:var(--pink); box-shadow:0 0 7px rgba(255,168,197,.9); }
+  .d .cur-h { position:absolute; bottom:0; left:var(--p); transform:translateX(-50%); width:9px; height:9px; border-radius:50%; background:var(--pink); box-shadow:0 0 8px rgba(255,168,197,1); }
+</style>
+
+<div class="control">
+  <div class="wrap">
+    <label for="slider">READ_PROGRESS //</label>
+    <input type="range" id="slider" min="0" max="100" value="58">
+    <span class="val" id="val">58%</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="head">
+    <h1>混搭試做 · C × 細刻度<span class="sub">SCANLINE CURSOR + FINE TICKS</span></h1>
+    <p class="lede">以 <b>C 掃描游標</b> 為主：保留移動的發光圓點與百分比標籤，但把連續軌道線換成 <b>比 B 更密更細的離散刻度</b>。游標經過的刻度點亮，並在游標附近做「粉色拖尾發光」，做出掃描/載入的律動感。拖滑桿看看，左邊是原本的 C 供對比。</p>
+  </div>
+
+  <div class="grid">
+    <!-- C 原版 -->
+    <div class="card c">
+      <h2>C · 掃描游標 <span class="zh">原版（連續軌道）</span></h2>
+      <p class="desc">游標沿一條連續的細線移動，走過的軌道留下淡光痕。</p>
+      <div class="demo-label">DESKTOP · 右側垂直</div>
+      <div class="frame-desktop">
+        <div class="lines"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="rail-v"><div class="done"></div><div class="cur"><span class="dot"></span><span class="lbl">58%</span></div></div>
+      </div>
+      <div class="demo-label">MOBILE · 底部橫向半透明</div>
+      <div class="frame-mobile">
+        <div class="lines"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="rail-h"><div class="done"></div><div class="cur"></div></div>
+      </div>
+    </div>
+
+    <!-- D 混搭 -->
+    <div class="card d hl">
+      <h2>D · 掃描游標 × 細刻度 <span class="zh">混搭</span><span class="badge">NEW</span></h2>
+      <p class="desc">游標移動的軌道改由一排密集細刻度組成，經過即點亮，游標前緣帶粉色拖尾光暈——像儀器上跑動的載入刻度。</p>
+      <div class="demo-label">DESKTOP · 右側垂直</div>
+      <div class="frame-desktop">
+        <div class="lines"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="rail-v"><div class="ticks-v"></div><div class="cur-v"><span class="dot"></span><span class="lbl">58%</span></div></div>
+      </div>
+      <div class="demo-label">MOBILE · 底部橫向半透明</div>
+      <div class="frame-mobile">
+        <div class="lines"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="rail-h"><div class="ticks-h"></div><div class="cur-h"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const VT = 40, HT = 46; // D 刻度數量（垂直/水平），比 B 密很多
+  document.querySelectorAll(".d .ticks-v").forEach((c) => { for (let i=0;i<VT;i++) c.appendChild(document.createElement("i")); });
+  document.querySelectorAll(".d .ticks-h").forEach((c) => { for (let i=0;i<HT;i++) c.appendChild(document.createElement("i")); });
+
+  const slider = document.getElementById("slider");
+  const val = document.getElementById("val");
+
+  // 依「已讀格數」點亮，最靠游標的 3 格做拖尾漸亮（t1 最亮=粉）
+  function paintTicks(container, total, p) {
+    const on = Math.round(p * total);
+    [...container.children].forEach((it, i) => {
+      const dist = on - i; // 1 = 緊鄰游標
+      let cls = "";
+      if (i < on) {
+        cls = "on";
+        if (dist === 1) cls += " t1";
+        else if (dist === 2) cls += " t2";
+        else if (dist === 3) cls += " t3";
+      }
+      it.className = cls;
+    });
+  }
+
+  function render() {
+    const p = +slider.value / 100;
+    const pct = slider.value + "%";
+    val.textContent = pct;
+    document.documentElement.style.setProperty("--p", (p*100) + "%");
+    document.querySelectorAll(".c .lbl, .d .lbl").forEach((e) => e.textContent = pct);
+    document.querySelectorAll(".d .ticks-v").forEach((c) => paintTicks(c, VT, p));
+    document.querySelectorAll(".d .ticks-h").forEach((c) => paintTicks(c, HT, p));
+  }
+  slider.addEventListener("input", render);
+  render();
+</script>

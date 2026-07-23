@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from "astro:content";
 import Base from "../../layouts/Base.astro";
+import ReadingProgress from "../../components/ReadingProgress.astro";
 
 // 只為「有內文」的作品生成站內閱讀頁（紙本或想全文刊登的作品）
 export async function getStaticPaths() {
@@ -15,6 +16,7 @@ const { Content } = await render(work);
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
 ---
 <Base title={work.data.title} description={work.data.note ?? work.data.title}>
+  <ReadingProgress />
   <article class="wrap">
     <header class="page-hero">
       <span class="tag">{work.data.platform} // {fmt(work.data.date)}</span>
