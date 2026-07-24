@@ -23,7 +23,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
   <div class="wrap hero">
     <span class="tag">WRITER / EXPLORER / v2026.07</span>
     <h1>在文字與訊號之間，<br /><span class="grad-text">記錄我正在成為的樣子</span><span class="cursor" aria-hidden="true"></span></h1>
-    <p class="byline mono">Ying-Huan Chiu <span class="alias">(isocyclo)</span></p>
+    <p class="byline mono">Ying-Huan Chiu <span class="alias">(isocyclo)</span> <span class="zh-name">邱映寰</span></p>
     <p class="lede">
       這裡存放我的採訪與邀稿作品、跨領域的經歷成果，以及還在發酵中的所思所想。歡迎留言，或訂閱電子報接收新文章。
     </p>
@@ -83,6 +83,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
   }
   .byline::before { content: "> "; color: var(--pink); }
   .byline .alias { color: var(--dim); letter-spacing: .12em; }
+  .byline .zh-name { color: var(--pink); letter-spacing: .28em; margin-left: 4px; }
   .hero .lede { max-width: 34em; margin-top: 16px; color: var(--dim); }
   .cursor {
     display: inline-block; width: .55em; height: 1.05em;
