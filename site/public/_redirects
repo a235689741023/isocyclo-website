@@ -1,3 +1,0 @@
-# Cloudflare Pages 轉址規則
-# www 自動 301 轉到主網域（不帶 www）
-https://www.isocyclo.com/*  https://isocyclo.com/:splat  301
