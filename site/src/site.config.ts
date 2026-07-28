@@ -12,4 +12,5 @@ export const SITE = {
 
   buttondownUsername: "ying-huan",
   cusdisAppId: "b662b522-4dab-46b2-a3c6-3660f907ef7d",
+  lyketApiKey: "pt_eb9b1cf365b3ad6572d6b319ff9c5b", // 按讚（Public key，可公開）
 };

@@ -2,6 +2,7 @@
 import { getCollection, render } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import ReadingProgress from "../../components/ReadingProgress.astro";
+import LikeButton from "../../components/LikeButton.astro";
 
 // 只為「有內文」的作品生成站內閱讀頁（紙本或想全文刊登的作品）
 export async function getStaticPaths() {
@@ -31,6 +32,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     <div class="prose">
       <Content />
     </div>
+    <LikeButton namespace="works" id={work.id} />
     <p class="back mono"><a href="/works/">← BACK_TO_ARCHIVE</a></p>
   </article>
 </Base>

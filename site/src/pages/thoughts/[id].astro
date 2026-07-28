@@ -4,6 +4,7 @@ import Base from "../../layouts/Base.astro";
 import Comments from "../../components/Comments.astro";
 import SubscribeForm from "../../components/SubscribeForm.astro";
 import ReadingProgress from "../../components/ReadingProgress.astro";
+import LikeButton from "../../components/LikeButton.astro";
 
 export async function getStaticPaths() {
   const posts = await getCollection("thoughts", ({ data }) => !data.draft);
@@ -24,6 +25,8 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     <div class="prose">
       <Content />
     </div>
+
+    <LikeButton namespace="thoughts" id={post.id} />
 
     <div class="after">
       <div class="panel"><SubscribeForm /></div>

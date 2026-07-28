@@ -1,0 +1,79 @@
+---
+// 按讚按鈕 — 用 Lyket REST API（vanilla JS，不引入框架）
+// press 為 toggle：再按取消。Lyket 以 IP 追蹤匿名訪客防重複按。
+import { SITE } from "../site.config";
+interface Props {
+  namespace: string; // "thoughts" 或 "works"
+  id: string;        // 該篇的唯一 id
+}
+const { namespace, id } = Astro.props;
+const configured = SITE.lyketApiKey && SITE.lyketApiKey.length > 0;
+---
+{configured && (
+  <div class="likebox" data-ns={namespace} data-id={id} data-key={SITE.lyketApiKey}>
+    <button type="button" class="like-btn" aria-pressed="false" aria-label="按讚">
+      <svg class="heart" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 20.3l-1.45-1.32C5.4 14.24 2 11.16 2 7.5 2 4.9 4.02 3 6.6 3c1.46 0 2.86.68 3.4 1.74C10.54 3.68 11.94 3 13.4 3 15.98 3 18 4.9 18 7.5c0 3.66-3.4 6.74-8.55 11.48L12 20.3z" transform="translate(1.5 0.5)"/>
+      </svg>
+      <span class="count mono">·</span>
+    </button>
+    <span class="like-hint mono">覺得不錯就按一個</span>
+  </div>
+)}
+
+<style>
+  .likebox { display: flex; align-items: center; gap: 14px; margin: 8px 0; }
+  .like-btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    background: var(--panel); border: 1px solid var(--line);
+    color: var(--dim); border-radius: 999px; padding: 9px 18px;
+    font-family: var(--font-mono); font-size: 14px; cursor: pointer;
+    transition: border-color .15s, color .15s, box-shadow .2s, transform .1s;
+  }
+  .like-btn .heart { width: 17px; height: 17px; fill: none; stroke: var(--aqua); stroke-width: 1.8; transition: fill .2s, stroke .2s; }
+  .like-btn .count { font-variant-numeric: tabular-nums; min-width: 1ch; }
+  .like-btn:hover { border-color: var(--aqua); color: var(--text); }
+  .like-btn:active { transform: scale(.95); }
+  .like-btn.liked { border-color: var(--pink); color: var(--pink); box-shadow: 0 0 12px rgba(255, 168, 197, .35); }
+  .like-btn.liked .heart { fill: var(--pink); stroke: var(--pink); }
+  .like-btn.pending { opacity: .55; cursor: progress; }
+  .like-btn:focus-visible { outline: 2px solid var(--aqua); outline-offset: 2px; }
+  .like-hint { font-size: 11px; color: var(--dim-deep); letter-spacing: .08em; }
+  @media (prefers-reduced-motion: reduce) { .like-btn { transition: none; } }
+</style>
+
+<script>
+  document.querySelectorAll(".likebox").forEach((box) => {
+    const el = box as HTMLElement;
+    const ns = el.dataset.ns!, id = el.dataset.id!, key = el.dataset.key!;
+    const btn = el.querySelector(".like-btn") as HTMLButtonElement;
+    const countEl = el.querySelector(".count") as HTMLElement;
+    const base = `https://api.lyket.dev/v1/like-buttons/${encodeURIComponent(ns)}/${encodeURIComponent(id)}`;
+    const headers = { Authorization: `Bearer ${key}`, accept: "application/json" };
+
+    function render(attrs: any) {
+      countEl.textContent = String(attrs.total_likes);
+      btn.classList.toggle("liked", !!attrs.user_has_liked);
+      btn.setAttribute("aria-pressed", String(!!attrs.user_has_liked));
+    }
+
+    // 載入目前讚數與是否已按
+    fetch(base, { headers })
+      .then((r) => r.json())
+      .then((d) => render(d.data.attributes))
+      .catch(() => { countEl.textContent = "0"; });
+
+    // 點擊 toggle 按讚
+    let busy = false;
+    btn.addEventListener("click", () => {
+      if (busy) return;
+      busy = true;
+      btn.classList.add("pending");
+      fetch(base + "/press", { method: "PUT", headers })
+        .then((r) => r.json())
+        .then((d) => render(d.data.attributes))
+        .catch(() => {})
+        .finally(() => { busy = false; btn.classList.remove("pending"); });
+    });
+  });
+</script>
