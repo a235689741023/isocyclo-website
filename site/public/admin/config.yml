@@ -24,10 +24,32 @@ collections:
         name: profile
         label: 照片與自我介紹
         fields:
-          - { name: name, label: 名字, widget: string }
+          - { name: name, label: 名字（英文名 + 別名）, widget: string }
+          - { name: nameEn, label: 英文名, widget: string, required: false }
           - { name: chineseName, label: 中文名字, widget: string, required: false }
           - { name: photo, label: 個人照片, widget: image, default: /uploads/profile-placeholder.svg }
-          - { name: body, label: 自我介紹, widget: markdown }
+          - { name: tagline, label: 一句話簡介, widget: string, required: false }
+          - { name: subline, label: 副標, widget: string, required: false }
+          - { name: email, label: Email, widget: string, required: false }
+          - { name: linkedin, label: LinkedIn 網址, widget: string, required: false }
+          - { name: g0vSlack, label: g0v Slack 帳號, widget: string, required: false }
+          - name: education
+            label: 教育
+            widget: list
+            required: false
+            fields:
+              - { name: school, label: 學校, widget: string }
+              - { name: dept, label: 系所, widget: string }
+              - { name: year, label: 期間, widget: string }
+          - { name: languages, label: 語言（每列一項）, widget: list, required: false }
+          - { name: skills, label: 技能（每列一項）, widget: list, required: false }
+          - name: awards
+            label: 其他競賽獎項
+            widget: list
+            required: false
+            fields:
+              - { name: title, label: 名稱, widget: string }
+              - { name: year, label: 年份, widget: string }
 
   - name: thoughts
     label: 所思所想
@@ -62,11 +84,16 @@ collections:
     folder: site/src/content/experience
     create: true
     fields:
+      - name: category
+        label: 類別
+        widget: select
+        options: [研究, 寫作, 轉譯, 策展, 專案, 開源, 教學]
       - { name: title, label: 標題, widget: string }
-      - { name: field, label: 領域, widget: string, hint: "例如：寫作、策展" }
-      - { name: period, label: 期間, widget: string, hint: "例如：2024 – 現在" }
+      - { name: subtitle, label: 單位／獎項／場合, widget: string, required: false }
+      - { name: year, label: 年份, widget: string, hint: "例如：2024 – 現在" }
+      - { name: featured, label: 重點呈現（會標★並排在前面）, widget: boolean, default: false }
       - { name: order, label: 排序（小的在前）, widget: number, default: 0 }
-      - { name: body, label: 說明, widget: markdown }
+      - { name: body, label: 說明, widget: markdown, required: false }
 
   - name: topics
     label: 留言板話題

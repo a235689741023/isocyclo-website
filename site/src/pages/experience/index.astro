@@ -3,67 +3,165 @@ import { getCollection, render } from "astro:content";
 import Base from "../../layouts/Base.astro";
 
 const [profile] = await getCollection("about");
-const ProfileContent = profile ? (await render(profile)).Content : null;
 
-const items = (await getCollection("experience"))
-  .sort((a, b) => a.data.order - b.data.order);
-
+const items = await getCollection("experience");
 const rendered = await Promise.all(
   items.map(async (item) => ({ item, Content: (await render(item)).Content }))
 );
+
+// 類別順序與對應的英文 HUD 標籤
+const CATEGORY_ORDER: [string, string][] = [
+  ["研究", "RESEARCH"],
+  ["寫作", "WRITING"],
+  ["轉譯", "TRANSLATION"],
+  ["策展", "CURATION"],
+  ["專案", "PROJECT"],
+  ["開源", "OPEN_SOURCE"],
+  ["教學", "TEACHING"],
+];
+
+const groups = CATEGORY_ORDER.map(([zh, en]) => ({
+  zh,
+  en,
+  list: rendered
+    .filter((r) => r.item.data.category === zh)
+    .sort(
+      (a, b) =>
+        Number(b.item.data.featured) - Number(a.item.data.featured) ||
+        a.item.data.order - b.item.data.order
+    ),
+})).filter((g) => g.list.length > 0);
+
+const p = profile?.data;
 ---
-<Base title="Encoding_of_Me 組成我的那些" description="個人簡介與各領域累積的經驗與成果。">
+<Base title="Encoding_of_Me 組成我的那些" description="邱映寰（Ying-Huan Chiu / isocyclo）的個人簡介、教育、語言、技能與各領域經歷成果。">
   <div class="wrap page-hero">
-    <span class="tag">TRACK_RECORD // {items.length} FIELDS</span>
+    <span class="tag">TRACK_RECORD // {items.length} ENTRIES</span>
     <h1>Encoding_of_Me<span class="sub">組成我的那些</span></h1>
   </div>
 
   <div class="wrap groups">
-    {profile && (
+    {p && (
       <section class="panel profile">
         <div class="panel-head"><b>WHOAMI //</b> 個人簡介</div>
         <div class="profile-body">
-          <img class="photo" src={profile.data.photo} alt={`${profile.data.name} 的照片`} width="200" height="200" />
-          <div class="prose intro">
-            <p class="name mono">{profile.data.name}</p>
-            {profile.data.chineseName && <p class="cname">{profile.data.chineseName}</p>}
-            {ProfileContent && <ProfileContent />}
+          <img class="photo" src={p.photo} alt={`${p.chineseName ?? p.name} 的照片`} width="200" height="200" />
+          <div class="intro">
+            <p class="name-en mono">{p.nameEn ?? p.name}</p>
+            {p.chineseName && <p class="cname">{p.chineseName}</p>}
+            {p.tagline && <p class="tagline">{p.tagline}</p>}
+            {p.subline && <p class="subline">{p.subline}</p>}
+            <div class="links mono">
+              {p.email && <a href={`mailto:${p.email}`}>EMAIL</a>}
+              {p.linkedin && <a href={p.linkedin} target="_blank" rel="noopener">LINKEDIN</a>}
+              {p.g0vSlack && <span class="g0v">g0v Slack {p.g0vSlack}</span>}
+            </div>
           </div>
+        </div>
+
+        <div class="facts">
+          {p.education.length > 0 && (
+            <div class="fact">
+              <span class="fact-label mono">EDUCATION</span>
+              <ul class="edu">
+                {p.education.map((e) => (
+                  <li><b>{e.school}</b> {e.dept}<span class="yr mono">{e.year}</span></li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {p.languages.length > 0 && (
+            <div class="fact">
+              <span class="fact-label mono">LANGUAGES</span>
+              <div class="chips">{p.languages.map((l) => <span class="chip">{l}</span>)}</div>
+            </div>
+          )}
+          {p.skills.length > 0 && (
+            <div class="fact">
+              <span class="fact-label mono">SKILLS</span>
+              <div class="chips">{p.skills.map((s) => <span class="chip">{s}</span>)}</div>
+            </div>
+          )}
         </div>
       </section>
     )}
 
-    {rendered.map(({ item, Content }) => (
+    {groups.map((g) => (
       <section class="panel">
         <div class="panel-head">
-          <b>{item.data.field} //</b> {item.data.title}
-          <span>{item.data.period}</span>
+          <b>{g.en} //</b> {g.zh}
+          <span>{g.list.length} 項</span>
         </div>
-        <div class="prose body">
-          <Content />
-        </div>
+        {g.list.map(({ item, Content }) => (
+          <article class:list={["exp", { featured: item.data.featured }]}>
+            <h3>
+              {item.data.featured && <span class="star" aria-hidden="true">★</span>}
+              {item.data.title}
+            </h3>
+            {item.data.subtitle && <div class="sub-line">{item.data.subtitle}</div>}
+            <div class="meta mono">{item.data.year}</div>
+            <div class="prose note"><Content /></div>
+          </article>
+        ))}
       </section>
     ))}
+
+    {p && p.awards.length > 0 && (
+      <section class="panel">
+        <div class="panel-head"><b>MINOR_AWARDS //</b> 其他競賽入圍與獲獎</div>
+        <ul class="awards">
+          {p.awards.map((a) => (
+            <li><span class="a-title">{a.title}</span><span class="yr mono">{a.year}</span></li>
+          ))}
+        </ul>
+      </section>
+    )}
   </div>
 </Base>
 
 <style>
   .groups { display: flex; flex-direction: column; gap: 20px; }
-  .body { font-size: 14.5px; }
 
+  /* ---- 個人簡介 ---- */
   .profile-body { display: flex; gap: 28px; align-items: flex-start; }
   @media (max-width: 640px) { .profile-body { flex-direction: column; } }
   .photo {
     width: 200px; height: 200px; object-fit: cover; flex-shrink: 0;
     border: 1px solid var(--line); border-radius: 6px;
   }
-  .intro { font-size: 14.5px; }
-  .intro .name {
-    color: var(--aqua); font-size: 15px; letter-spacing: .08em;
-    margin-bottom: 2px;
-  }
-  .intro .cname {
-    color: var(--pink); font-size: 13.5px; letter-spacing: .35em;
-    margin-bottom: 4px;
-  }
+  .intro { flex: 1; }
+  .name-en { color: var(--aqua); font-size: 14px; letter-spacing: .14em; }
+  .cname { color: var(--pink); font-size: 20px; letter-spacing: .3em; margin-top: 2px; }
+  .tagline { font-size: 15.5px; color: var(--text); margin-top: 14px; line-height: 1.7; }
+  .subline { font-size: 13.5px; color: var(--dim); margin-top: 6px; }
+  .links { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; font-size: 12px; align-items: center; }
+  .links a { color: var(--aqua); border: 1px solid var(--line); padding: 4px 12px; border-radius: 3px; letter-spacing: .1em; }
+  .links a:hover { border-color: var(--pink); color: var(--pink); }
+  .links .g0v { color: var(--dim); letter-spacing: .05em; }
+
+  .facts { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; padding-top: 22px; border-top: 1px dashed var(--line); }
+  .fact-label { font-size: 11px; letter-spacing: .22em; color: var(--dim); display: block; margin-bottom: 10px; }
+  .edu { display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+  .edu li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
+  .edu b { color: var(--text); font-weight: 600; }
+  .edu .yr { margin-left: auto; color: var(--dim); font-size: 11.5px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  /* ---- 經歷卡片 ---- */
+  .exp { padding: 16px 0; border-bottom: 1px dashed var(--line); }
+  .exp:last-child { border-bottom: 0; }
+  .exp h3 { font-size: 16px; font-weight: 600; line-height: 1.5; }
+  .exp .star { color: var(--pink); margin-right: 6px; font-size: 13px; vertical-align: 1px; }
+  .exp.featured h3 { color: var(--text); }
+  .exp .sub-line { font-size: 13px; color: var(--aqua); margin-top: 5px; letter-spacing: .02em; }
+  .exp .meta { font-size: 11.5px; color: var(--dim); margin-top: 4px; letter-spacing: .06em; }
+  .exp .note { font-size: 13.5px; color: var(--dim); margin-top: 8px; max-width: none; }
+  .exp .note :global(p) { margin: 0; }
+
+  /* ---- 次要獎項 ---- */
+  .awards { display: flex; flex-direction: column; gap: 10px; }
+  .awards li { display: flex; gap: 12px; align-items: baseline; font-size: 14px; padding: 6px 0; border-bottom: 1px dashed var(--line); }
+  .awards li:last-child { border-bottom: 0; }
+  .awards .a-title { flex: 1; }
+  .awards .yr { color: var(--dim); font-size: 11.5px; }
 </style>

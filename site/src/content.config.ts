@@ -31,7 +31,17 @@ const about = defineCollection({
   schema: z.object({
     name: z.string(),
     chineseName: z.string().optional(),
+    nameEn: z.string().optional(),
     photo: z.string().default("/uploads/profile-placeholder.svg"),
+    tagline: z.string().optional(),
+    subline: z.string().optional(),
+    email: z.string().optional(),
+    linkedin: z.string().optional(),
+    g0vSlack: z.string().optional(),
+    education: z.array(z.object({ school: z.string(), dept: z.string(), year: z.string() })).default([]),
+    languages: z.array(z.string()).default([]),
+    skills: z.array(z.string()).default([]),
+    awards: z.array(z.object({ title: z.string(), year: z.string() })).default([]),
   }),
 });
 
@@ -39,9 +49,11 @@ const about = defineCollection({
 const experience = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./src/content/experience" }),
   schema: z.object({
+    category: z.string(), // 類別：研究/寫作/轉譯/策展/專案/開源/教學
     title: z.string(),
-    field: z.string(), // 領域，如「寫作」「策展」
-    period: z.string(), // 例如 "2024 – 2026"
+    subtitle: z.string().optional(), // 單位／獎項／場合
+    year: z.string(),
+    featured: z.boolean().default(false), // 是否重點呈現
     order: z.number().default(0), // 排序，數字小的在前
   }),
 });
