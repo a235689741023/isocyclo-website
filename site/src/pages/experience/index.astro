@@ -62,16 +62,6 @@ const p = profile?.data;
         </div>
 
         <div class="facts">
-          {p.education.length > 0 && (
-            <div class="fact">
-              <span class="fact-label mono">EDUCATION</span>
-              <ul class="edu">
-                {p.education.map((e) => (
-                  <li><b>{e.school}</b> {e.dept}<span class="yr mono">{e.year}</span></li>
-                ))}
-              </ul>
-            </div>
-          )}
           {p.languages.length > 0 && (
             <div class="fact">
               <span class="fact-label mono">LANGUAGES</span>
