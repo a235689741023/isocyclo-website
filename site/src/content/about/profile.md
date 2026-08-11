@@ -1,9 +1,12 @@
 ---
 name: Ying-Huan Chiu (isocyclo)
 chineseName: 邱映寰
-photo: /uploads/profile-placeholder.svg
+photo: /uploads/3eb91096-1cce-4a02-98f0-162aa855b2bc_1_102_o.jpg
 ---
+寫小說、寫詩的人，也是好奇心過剩的探索者。
 
-（這是範例自我介紹，可在後台或直接編輯 `site/src/content/about/profile.md` 替換。）
+另一個身份是同時在地理資訊技術領域、臺灣文學領域進行時空歷險的人。
 
-寫字的人，也是好奇心過剩的探索者。為媒體撰寫採訪與專題，同時在寫作之外進行各種不務正業的嘗試——策展、聲音採集、膠捲沖洗。相信記錄本身就是一種創作。
+業餘亦撰寫採訪、專題與展覽文案，同時在寫作之外進行各種不務正業的嘗試。
+
+Et es wie et es.
