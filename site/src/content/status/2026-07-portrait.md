@@ -1,5 +1,5 @@
 ---
 kind: WATCH
-text: 《Killing Eve》on Netflix（相見恨晚......）
-date: 2026-07-05
+text: 《Achtsam morden》on Netflix
+date: 2026-08-13
 ---
