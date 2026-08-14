@@ -1,5 +1,5 @@
 ---
-title: 台積電文學獎AI使用爭議事件之所感
+title: 台積電青年文學獎AI使用爭議事件之所感
 date: 2026-08-15
 category: 隨筆
 draft: false
