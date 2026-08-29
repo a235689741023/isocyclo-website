@@ -75,6 +75,8 @@ collections:
     label_singular: 經歷
     folder: site/src/content/experience
     create: true
+    summary: "【{{fields.category}}】{{fields.title}}　—　{{fields.year}}"
+    sortable_fields: [category, order, year, title]
     fields:
       - name: category
         label: 類別
