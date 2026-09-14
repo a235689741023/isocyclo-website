@@ -1,16 +1,23 @@
 ---
 // 按讚按鈕 — 用 Lyket REST API（vanilla JS，不引入框架）
 // press 為 toggle：再按取消。Lyket 以 IP 追蹤匿名訪客防重複按。
+import { createHash } from "node:crypto";
 import { SITE } from "../site.config";
 interface Props {
   namespace: string; // "thoughts" 或 "works"
-  id: string;        // 該篇的唯一 id
+  id: string;        // 該篇的唯一 id（可能含中文，需轉為 Lyket 允許的格式）
 }
 const { namespace, id } = Astro.props;
 const configured = SITE.lyketApiKey && SITE.lyketApiKey.length > 0;
+// Lyket 的 id 只允許 [A-Za-z0-9._-] 且長度 < 80；中文檔名會被 API 拒絕（422）。
+// 符合規則的 id 原樣保留（好讀），否則用穩定雜湊產生安全 id。
+const safeId =
+  /^[A-Za-z0-9._-]+$/.test(id) && id.length < 80
+    ? id
+    : `${namespace}-${createHash("sha1").update(id).digest("hex").slice(0, 24)}`;
 ---
 {configured && (
-  <div class="likebox" data-ns={namespace} data-id={id} data-key={SITE.lyketApiKey}>
+  <div class="likebox" data-ns={namespace} data-id={safeId} data-key={SITE.lyketApiKey}>
     <button type="button" class="like-btn" aria-pressed="false" aria-label="按讚">
       <svg class="heart" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M12 20.3l-1.45-1.32C5.4 14.24 2 11.16 2 7.5 2 4.9 4.02 3 6.6 3c1.46 0 2.86.68 3.4 1.74C10.54 3.68 11.94 3 13.4 3 15.98 3 18 4.9 18 7.5c0 3.66-3.4 6.74-8.55 11.48L12 20.3z" transform="translate(1.5 0.5)"/>
@@ -60,8 +67,11 @@ const configured = SITE.lyketApiKey && SITE.lyketApiKey.length > 0;
     // 載入目前讚數與是否已按
     fetch(base, { headers })
       .then((r) => r.json())
-      .then((d) => render(d.data.attributes))
-      .catch(() => { countEl.textContent = "0"; });
+      .then((d) => {
+        if (d.errors) throw new Error(d.errors[0]?.message || "Lyket error");
+        render(d.data.attributes);
+      })
+      .catch((e) => { countEl.textContent = "0"; console.warn("[like] load failed:", e); });
 
     // 點擊 toggle 按讚
     let busy = false;
@@ -71,8 +81,11 @@ const configured = SITE.lyketApiKey && SITE.lyketApiKey.length > 0;
       btn.classList.add("pending");
       fetch(base + "/press", { method: "PUT", headers })
         .then((r) => r.json())
-        .then((d) => render(d.data.attributes))
-        .catch(() => {})
+        .then((d) => {
+          if (d.errors) throw new Error(d.errors[0]?.message || "Lyket error");
+          render(d.data.attributes);
+        })
+        .catch((e) => { console.warn("[like] press failed:", e); })
         .finally(() => { busy = false; btn.classList.remove("pending"); });
     });
   });
